@@ -4378,3 +4378,26 @@ tr.low-stock {
     border-top-color: #000000 !important;
   }
 }
+.pdv-payment-lines {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.payment-line {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid var(--line, #d5d8e1);
+  border-radius: 10px;
+  background: var(--panel, #fff);
+}
+
+.payment-line select,
+.payment-line input {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--line, #d5d8e1);
+}
