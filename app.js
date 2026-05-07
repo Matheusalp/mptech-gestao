@@ -3472,9 +3472,10 @@ function renderCart() {
   const adjustment = cartPriceAdjustment();
   const discount = calculateDiscount(subtotal);
   const total = Math.max(subtotal - discount, 0);
-  const received = Number($("#amount-received")?.value || 0);
-  const paymentMethod = $("#payment-method")?.value || "Dinheiro";
-  const change = paymentMethod === "Dinheiro" ? Math.max(received - total, 0) : 0;
+  const payments = collectCheckoutPayments(total);
+  const received = payments.totalPaid;
+  const change = Math.max(received - total, 0);
+  const remaining = Math.max(total - received, 0);
   const cartNode = $("#cart-table");
   const cartPanel = $("#pdv .pdv-cart");
   const cartIsEmpty = !state.cart.length;
@@ -3512,10 +3513,46 @@ function renderCart() {
   $("#pdv-checkout-item-adjustment-row")?.classList.toggle("hidden", Math.abs(adjustment) < 0.005);
   setText("#pdv-checkout-discount", money.format(discount));
   setText("#pdv-checkout-total", money.format(total));
-  setText("#change-value", money.format(change));
+  setText("#change-value", remaining > 0 ? `Resta ${money.format(remaining)}` : money.format(change));
+  if ($("#amount-received")) $("#amount-received").value = received.toFixed(2);
+  renderCheckoutPayments(total);
   renderCheckoutItemAdjustments();
   renderPdvClientSelector();
   renderQuoteSelector();
+}
+
+function checkoutPaymentOptions() {
+  return ["Dinheiro", "Pix", "Cartão", "Fiado"];
+}
+
+function checkoutPaymentLineMarkup({ method = "Dinheiro", value = 0 } = {}) {
+  return `<div class="payment-line">
+    <select data-payment-method-line>${checkoutPaymentOptions().map((option) => `<option ${normalizePayment(option) === normalizePayment(method) ? "selected" : ""}>${option}</option>`).join("")}</select>
+    <input data-payment-value-line type="number" min="0" step="0.01" value="${Math.max(0, toNumber(value)).toFixed(2)}" />
+    <button type="button" class="btn small ghost" data-remove-payment-line="1">Remover</button>
+  </div>`;
+}
+
+function collectCheckoutPayments(total = 0) {
+  const lines = Array.from($$("#pdv-payment-lines .payment-line"));
+  const payments = lines.map((line) => ({
+    method: normalizePayment(line.querySelector("[data-payment-method-line]")?.value || "Dinheiro"),
+    value: Math.max(0, toNumber(line.querySelector("[data-payment-value-line]")?.value)),
+  })).filter((item) => item.value > 0.0001);
+  const fiado = payments.reduce((sum, item) => sum + (item.method === "Fiado" ? item.value : 0), 0);
+  const cash = payments.reduce((sum, item) => sum + (item.method === "Dinheiro" ? item.value : 0), 0);
+  const totalPaid = payments.reduce((sum, item) => sum + item.value, 0);
+  return { payments, fiado, cash, totalPaid, remaining: Math.max(total - totalPaid, 0) };
+}
+
+function renderCheckoutPayments(total = 0) {
+  const node = $("#pdv-payment-lines");
+  if (!node) return;
+  if (!node.children.length) {
+    node.innerHTML = checkoutPaymentLineMarkup({ method: "Dinheiro", value: Math.max(total, 0) });
+  }
+  const lines = node.querySelectorAll(".payment-line");
+  lines.forEach((line) => line.querySelector("[data-remove-payment-line]")?.toggleAttribute("disabled", lines.length <= 1));
 }
 
 function clearPdvCart() {
@@ -3640,8 +3677,9 @@ async function finalizarVenda() {
   const discountValue = Math.max(0, toNumber($("#cart-discount")?.value));
   const discount = calculateDiscount(subtotal, discountValue, discountType);
   const total = Math.max(subtotal - discount, 0);
-  const received = Math.max(0, Number($("#amount-received").value || 0));
-  const payment = normalizePayment($("#payment-method").value);
+  const checkoutPayments = collectCheckoutPayments(total);
+  const received = checkoutPayments.totalPaid;
+  const payment = checkoutPayments.payments[0]?.method || normalizePayment($("#payment-method").value);
   const client = selectedPdvClient();
   const seller = currentSeller();
   if (payment === "Fiado" && !client) {
@@ -3677,8 +3715,12 @@ async function finalizarVenda() {
     return;
   }
 
-  if ($("#payment-method").value === "Dinheiro" && received < total) {
-    showToast("Informe o valor recebido em dinheiro igual ou maior que o total.", "error");
+  if (checkoutPayments.remaining > 0 && checkoutPayments.fiado <= 0) {
+    showToast("Valor pago menor que o total. Adicione Fiado para saldo restante.", "error");
+    return;
+  }
+  if (received > total && checkoutPayments.cash <= 0) {
+    showToast("Pagamento maior que o total exige pelo menos uma linha em dinheiro para troco.", "error");
     return;
   }
 
@@ -3693,6 +3735,7 @@ async function finalizarVenda() {
     id: makeId("sale"),
     date: new Date().toISOString(),
     payment,
+    paymentDetails: checkoutPayments.payments,
     pagamento: payment.toLowerCase(),
     valor_pago: received,
     clientId: client?.id || "",
@@ -3724,7 +3767,7 @@ async function finalizarVenda() {
     commissionValue,
     commissionCanceled: false,
     received,
-    change: payment === "Dinheiro" ? Math.max(received - total, 0) : 0,
+    change: Math.max(received - total, 0),
     items: state.cart.map((item) => ({
       productId: item.id,
       code: item.code,
@@ -3792,15 +3835,20 @@ async function finalizarVenda() {
     state.data.accountsReceivable.unshift(receivable);
     syncReceivable(receivable);
   }
-  const saleMovement = {
-    id: makeId("cash"),
-    type: "sale",
-    date: sale.date,
-    description: `Venda ${sale.id.slice(-6).toUpperCase()}`,
-    value: sale.netTotal,
-    payment: sale.payment,
-  };
-  currentCashSession().movements.push(saleMovement);
+  const movementPayments = sale.paymentDetails?.length ? sale.paymentDetails : [{ method: sale.payment, value: sale.netTotal }];
+  movementPayments.forEach((paymentItem) => {
+    if (normalizePayment(paymentItem.method) === "Fiado") return;
+    const saleMovement = {
+      id: makeId("cash"),
+      type: "sale",
+      date: sale.date,
+      description: `Venda ${sale.id.slice(-6).toUpperCase()} - ${normalizePayment(paymentItem.method)}`,
+      value: Math.max(0, toNumber(paymentItem.value)),
+      payment: normalizePayment(paymentItem.method),
+    };
+    currentCashSession().movements.push(saleMovement);
+    syncCashMovement(currentCashSession().id, saleMovement);
+  });
   saveData();
   if (backendSaved) {
     state.data.products.forEach((product) => syncProduct(product));
@@ -3808,7 +3856,6 @@ async function finalizarVenda() {
     // Evita sincronizar produto ja baixado e depois reprocessar a venda, o que duplicaria baixa de estoque no PostgreSQL.
     syncSale(sale);
   }
-  syncCashMovement(currentCashSession().id, saleMovement);
   saveDataWithAudit("Venda finalizada", `${sale.items.length} item(ns), total ${money.format(sale.total)}`);
   state.cart = [];
   state.selectedClientId = "";
@@ -3865,6 +3912,8 @@ function openPdvCheckoutModal() {
   if (!modal) return false;
   renderPdvSellerSelector();
   renderPdvClientSelector();
+  const paymentLines = $("#pdv-payment-lines");
+  if (paymentLines) paymentLines.innerHTML = "";
   renderCart();
   modal.classList.remove("hidden");
   modal.setAttribute("aria-hidden", "false");
@@ -8037,6 +8086,17 @@ function bindEvents() {
   $("#cart-discount").addEventListener("input", renderCart);
   $("#cart-discount-type")?.addEventListener("change", renderCart);
   $("#amount-received").addEventListener("input", renderCart);
+  $("#add-payment-line")?.addEventListener("click", () => {
+    const node = $("#pdv-payment-lines");
+    if (!node) return;
+    const total = Math.max(0, cartSubtotal() - calculateDiscount(cartSubtotal()));
+    const payments = collectCheckoutPayments(total);
+    node.insertAdjacentHTML("beforeend", checkoutPaymentLineMarkup({ value: payments.remaining }));
+    renderCart();
+  });
+  $("#pdv-payment-lines")?.addEventListener("input", (event) => {
+    if (event.target.matches("[data-payment-value-line], [data-payment-method-line]")) renderCart();
+  });
   $("#quick-product").addEventListener("click", () => {
     if (state.pdvLocked) {
       showToast("Modo venda ativo. Cadastros ficam bloqueados ate desbloquear a gestao.", "error");
@@ -8523,7 +8583,7 @@ function bindEvents() {
       return;
     }
 
-    const target = event.target.closest("[data-add-cart], [data-edit-product], [data-delete-product], [data-remove-cart], [data-category], [data-payment], [data-cart-inc], [data-cart-dec], [data-close-product-modal], [data-cancel-sale], [data-cancel-income], [data-print-sale], [data-select-sale], [data-reprint-selected-sale], [data-view-sale], [data-copy-receipt], [data-whatsapp-sale], [data-delete-expense], [data-pay-account], [data-receive-account], [data-adjust-stock], [data-view-client], [data-edit-client], [data-toggle-client-status], [data-delete-client]");
+    const target = event.target.closest("[data-add-cart], [data-edit-product], [data-delete-product], [data-remove-cart], [data-category], [data-payment], [data-cart-inc], [data-cart-dec], [data-close-product-modal], [data-cancel-sale], [data-cancel-income], [data-print-sale], [data-select-sale], [data-reprint-selected-sale], [data-view-sale], [data-copy-receipt], [data-whatsapp-sale], [data-delete-expense], [data-pay-account], [data-receive-account], [data-adjust-stock], [data-view-client], [data-edit-client], [data-toggle-client-status], [data-delete-client], [data-remove-payment-line]");
     if (!target) return;
 
     const addId = target.dataset.addCart;
@@ -8551,6 +8611,7 @@ function bindEvents() {
     const editClientId = target.dataset.editClient;
     const toggleClientStatusId = target.dataset.toggleClientStatus;
     const deleteClientId = target.dataset.deleteClient;
+    const removePaymentLine = target.dataset.removePaymentLine;
 
     if (addId) addToCart(addId);
     if (editId) editProduct(editId);
@@ -8596,6 +8657,10 @@ function bindEvents() {
     if (closeProductModal) resetProductForm();
     if (removeId) {
       state.cart = state.cart.filter((item) => item.id !== removeId);
+      renderCart();
+    }
+    if (removePaymentLine) {
+      target.closest(".payment-line")?.remove();
       renderCart();
     }
   });

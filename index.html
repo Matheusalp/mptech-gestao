@@ -486,11 +486,15 @@
                 <option>Fiado</option>
               </select>
             </div>
+            <div class="multi-payment-toolbar">
+              <button id="add-payment-line" class="btn small ghost" type="button">+ Adicionar pagamento</button>
+            </div>
+            <div id="pdv-payment-lines" class="pdv-payment-lines"></div>
                 </div>
                 <div class="cash-row">
-                  <label>Recebido (R$) <input id="amount-received" type="number" min="0" step="0.01" placeholder="R$ 0,00" /></label>
+                  <label>Total pago (R$) <input id="amount-received" type="number" min="0" step="0.01" placeholder="R$ 0,00" readonly /></label>
                   <div class="change-box">
-                    <span>Troco</span>
+                    <span>Troco/Restante</span>
                     <strong id="change-value">R$ 0,00</strong>
                   </div>
                 </div>
