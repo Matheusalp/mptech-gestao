@@ -1,0 +1,1218 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MPTech Gestão</title>
+    <link rel="icon" href="assets/logo-world.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main id="login-screen" class="login-screen">
+      <section class="login-card">
+        <img class="login-logo" src="assets/logo-world.svg" width="640" height="360" decoding="async" alt="World Acessorios Atacado" />
+        <h1>MPTech Gestão</h1>
+        <p>Controle simples de vendas, estoque e financeiro.</p>
+        <form id="login-form">
+          <label>
+            Usuário
+            <input id="login-user" type="text" autocomplete="username" placeholder="email@loja.com" required />
+          </label>
+          <label>
+            Senha
+            <input id="login-pass" type="password" autocomplete="current-password" required />
+          </label>
+          <button type="submit" class="btn primary full">Entrar</button>
+          <span id="login-error" class="form-error"></span>
+        </form>
+      </section>
+    </main>
+
+    <div id="app-shell" class="app-shell hidden">
+      <button class="sidebar-backdrop" type="button" aria-label="Fechar menu"></button>
+      <header class="sidebar app-header">
+        <button class="menu-toggle" type="button" aria-label="Menu">☰</button>
+        <div class="sidebar-brand">
+          <img class="sidebar-logo" src="assets/logo-world.svg" width="640" height="360" decoding="async" alt="World Acessorios Atacado" />
+          <div>
+            <strong>World Acessorios Atacado</strong>
+            <span>MPTech Gestão</span>
+          </div>
+        </div>
+        <nav class="nav-menu" aria-label="Menu principal">
+          <button class="nav-link active" data-screen="dashboard" data-label="Dashboard"><span>⌂</span><b>Dashboard<small>Visão geral do seu negócio</small></b><i class="nav-arrow">›</i></button>
+          <button class="nav-link" data-screen="pdv" data-label="PDV"><span>▱</span><b>PDV<small>Ponto de venda</small></b><i class="nav-arrow">›</i></button>
+          <button class="nav-link" data-screen="products" data-label="Produtos / Estoque"><span>▧</span><b>Produtos / Estoque<small>Gerencie produtos e estoque</small></b><i class="nav-arrow">›</i></button>
+          <button class="nav-link" data-screen="sales" data-label="Vendas"><span>▤</span><b>Vendas<small>Histórico de vendas</small></b><i class="nav-arrow">›</i></button>
+          <div class="nav-group">
+            <button class="nav-link nav-parent" data-screen="finance" data-label="Financeiro" aria-expanded="false"><span>$</span><b>Financeiro<small>Contas, pagamentos e recebimentos</small></b><i class="nav-caret">⌄</i></button>
+            <div class="nav-submenu">
+              <button class="nav-sublink" data-screen="finance">Visão Geral</button>
+              <button class="nav-sublink" data-screen="finance-income">Entradas</button>
+              <button class="nav-sublink" data-screen="finance-expenses">Saídas</button>
+              <button class="nav-sublink" data-screen="accounts-payable">Contas a Pagar</button>
+              <button class="nav-sublink" data-screen="accounts-receivable">Contas a Receber</button>
+            </div>
+          </div>
+          <button class="nav-link" data-screen="clients" data-label="Clientes"><span>◉</span><b>Clientes<small>Gerencie seus clientes</small></b><i class="nav-arrow">›</i></button>
+          <button class="nav-link" data-screen="reports" data-label="Relatórios"><span>▥</span><b>Relatórios<small>Análises e indicadores</small></b><i class="nav-arrow">›</i></button>
+          <button class="nav-link" data-screen="settings" data-label="Configurações"><span>⚙</span><b>Configurações<small>Sistema e preferências</small></b><i class="nav-arrow">›</i></button>
+        </nav>
+        <div class="topbar-actions app-header-actions">
+          <div class="header-utility" aria-label="Tema do sistema">
+            <button id="theme-dark-toggle" class="header-tool moon-symbol" type="button" aria-label="Ativar tema escuro" aria-pressed="false"></button>
+            <button id="theme-light-toggle" class="header-tool sun-symbol active" type="button" aria-label="Ativar tema claro" aria-pressed="true"></button>
+          </div>
+          <span id="db-connection-indicator" class="db-connection-indicator offline" title="Banco offline" aria-label="Banco offline"></span>
+          <span id="current-date" class="date-pill"></span>
+          <span class="session-status"><i></i>Online</span>
+          <button id="notification-button" class="notification-bell" type="button" aria-label="Abrir notificações" aria-expanded="false"><span></span><b id="notification-count">0</b></button>
+          <div id="notification-menu" class="notification-menu hidden" role="status"></div>
+          <div class="sidebar-user-card user-chip">
+            <span class="sidebar-user-avatar avatar">A</span>
+            <div>
+              <strong id="sidebar-user-name">Administrador</strong>
+              <small id="sidebar-user-email">admin@worldatacado.com.br</small>
+              <small class="sidebar-user-status"><i></i>Online</small>
+            </div>
+            <i>⌄</i>
+          </div>
+          <button id="logout-btn" class="btn ghost"><span>↪</span><b>Sair</b></button>
+        </div>
+      </header>
+
+      <section class="content">
+        <header class="topbar">
+          <div>
+            <span class="eyebrow">Sistema</span>
+            <h2 id="screen-title">Dashboard</h2>
+            <p id="screen-subtitle" class="screen-subtitle">Visão geral da sua empresa</p>
+          </div>
+        </header>
+
+        <section id="dashboard" class="screen active dashboard-screen">
+          <div id="dashboard-empty-state" class="dashboard-empty-state hidden" role="status">
+            <span class="empty-icon">PDV</span>
+            <div>
+              <strong>Nenhuma venda hoje</strong>
+              <small>Comece registrando vendas no PDV</small>
+            </div>
+            <button class="btn primary small" type="button" data-screen-jump="pdv">Abrir PDV</button>
+          </div>
+
+          <div class="dashboard-kpi-grid">
+            <article class="stat-card dashboard-stat kpi-card kpi-positive">
+              <span class="stat-icon money-icon">$</span>
+              <div>
+                <span>Faturamento do dia</span>
+                <strong id="dash-sales-today">R$ 0,00</strong>
+                <small id="dash-sales-note">Hoje</small>
+              </div>
+              <em class="kpi-trend neutral">- 0% vs ontem</em>
+            </article>
+            <article class="stat-card dashboard-stat kpi-card kpi-blue blue">
+              <span class="stat-icon chart-icon">↗</span>
+              <div>
+                <span>Lucro do dia</span>
+                <strong id="dash-profit-today">R$ 0,00</strong>
+                <small id="dash-profit-note">Hoje</small>
+              </div>
+              <em class="kpi-trend neutral">- 0% vs ontem</em>
+            </article>
+            <article class="stat-card dashboard-stat kpi-card kpi-warning orange">
+              <span class="stat-icon bag-icon">▣</span>
+              <div>
+                <span>Vendas realizadas</span>
+                <strong id="dash-sales-count">0</strong>
+                <small>Hoje</small>
+              </div>
+              <em class="kpi-trend neutral">- 0% vs ontem</em>
+            </article>
+            <article class="stat-card dashboard-stat kpi-card kpi-neutral cyan">
+              <span class="stat-icon ticket-icon">%</span>
+              <div>
+                <span>Ticket medio</span>
+                <strong id="dash-ticket">R$ 0,00</strong>
+                <small>Por venda</small>
+              </div>
+              <em class="kpi-trend neutral">Media diaria</em>
+            </article>
+          </div>
+
+          <div class="dashboard-main-grid">
+            <div class="panel chart-panel dashboard-chart-panel">
+              <div class="panel-header dashboard-panel-header">
+                <div>
+                  <h3>Desempenho de Vendas</h3>
+                  <p>Vendas, despesas e lucro no periodo selecionado.</p>
+                </div>
+                <div class="dashboard-period-filter" aria-label="Filtro de periodo do desempenho de vendas">
+                  <label>
+                    Periodo
+                    <select id="dashboard-period" class="compact-select">
+                      <option value="7">7 dias</option>
+                      <option value="30">30 dias</option>
+                      <option value="custom">Personalizado</option>
+                    </select>
+                  </label>
+                  <label>
+                    Inicio
+                    <input id="dashboard-start-date" type="date" />
+                  </label>
+                  <label>
+                    Fim
+                    <input id="dashboard-end-date" type="date" />
+                  </label>
+                </div>
+              </div>
+              <div class="chart-legend">
+                <span><i class="legend-blue"></i>Vendas</span>
+                <span><i class="legend-red"></i>Despesas</span>
+                <span><i class="legend-green"></i>Lucro</span>
+              </div>
+              <div id="finance-chart" class="finance-chart"></div>
+            </div>
+
+            <div class="panel financial-status">
+              <div class="panel-header dashboard-panel-header">
+                <div>
+                  <h3>Situação Financeira</h3>
+                  <p id="finance-status-note">Resumo atualizado em tempo real.</p>
+                </div>
+              </div>
+              <div class="status-content">
+                <div class="donut-wrap">
+                  <div id="finance-donut" class="donut-chart"></div>
+                  <div class="donut-center">
+                    <span>Saldo Atual</span>
+                    <strong id="donut-balance">R$ 0,00</strong>
+                    <small>Hoje</small>
+                  </div>
+                </div>
+                <div class="status-list">
+                  <span class="status-row status-income"><i class="dot green-dot"></i><b>Total de Entradas</b><strong id="status-income">R$ 0,00</strong></span>
+                  <span class="status-row status-expense"><i class="dot red-dot"></i><b>Total de Saidas</b><strong id="status-expenses">R$ 0,00</strong></span>
+                  <span class="status-row status-balance"><i class="dot blue-dot"></i><b>Saldo Atual</b><strong id="status-balance">R$ 0,00</strong></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel monthly-performance dashboard-goals-panel">
+            <div class="panel-header dashboard-panel-header">
+              <div>
+                <h3>Metas e Objetivos</h3>
+                <p>Acompanhamento mensal das metas comerciais.</p>
+              </div>
+              <div class="projection-card">
+                <span class="projection-icon">R$</span>
+                <div>
+                  <span>Projecao de fechamento</span>
+                  <strong id="month-projection">R$ 0,00</strong>
+                  <small id="month-projection-note">Baseado nas vendas do mes</small>
+                </div>
+              </div>
+            </div>
+            <div class="goal-list">
+              <div class="goal-item">
+                <span>Meta de Vendas</span>
+                <strong id="goal-sales-label">R$ 0,00 / R$ 0,00</strong>
+                <small id="goal-sales-percent">0%</small>
+                <i><b id="goal-sales-bar"></b></i>
+              </div>
+              <div class="goal-item">
+                <span>Meta de Lucro</span>
+                <strong id="goal-profit-label">R$ 0,00 / R$ 0,00</strong>
+                <small id="goal-profit-percent">0%</small>
+                <i><b id="goal-profit-bar"></b></i>
+              </div>
+              <div class="goal-item">
+                <span>Novos Clientes</span>
+                <strong id="goal-clients-label">0 / 0 clientes</strong>
+                <small id="goal-clients-percent">0%</small>
+                <i><b id="goal-clients-bar"></b></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-management-grid" aria-label="Gestao do dia">
+            <article class="stat-card dashboard-management-card cyan">
+              <span class="management-icon">+</span>
+              <div>
+                <span>Clientes novos</span>
+                <strong id="dash-new-clients">0</strong>
+                <small>Este mes</small>
+              </div>
+            </article>
+            <article class="stat-card dashboard-management-card green">
+              <span class="management-icon">%</span>
+              <div>
+                <span>Comissao do dia</span>
+                <strong id="dash-commission-today">R$ 0,00</strong>
+                <small>Hoje</small>
+              </div>
+            </article>
+            <article class="stat-card dashboard-management-card blue">
+              <span class="management-icon">V</span>
+              <div>
+                <span>Top vendedor</span>
+                <strong id="dash-top-seller">-</strong>
+                <small id="dash-top-seller-note">Mes atual</small>
+              </div>
+            </article>
+            <article class="stat-card dashboard-management-card red">
+              <span class="management-icon">!</span>
+              <div>
+                <span>Contas vencidas</span>
+                <strong id="dash-overdue-receivables">R$ 0,00</strong>
+                <small id="dash-overdue-note">0 contas</small>
+              </div>
+            </article>
+          </div>
+
+          <div class="dashboard-bottom-grid dashboard-insights-grid">
+            <div class="panel dashboard-list-panel">
+              <div class="panel-header">
+                <h3>Top Produtos</h3>
+              </div>
+              <div class="table-wrap compact-table-wrap">
+                <table class="compact-dashboard-table">
+                  <thead><tr><th>Produto</th><th>Vendas</th><th>Faturamento</th></tr></thead>
+                  <tbody id="top-products-table"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel dashboard-list-panel">
+              <div class="panel-header">
+                <h3>Ultimas Vendas</h3>
+              </div>
+              <div class="table-wrap compact-table-wrap">
+                <table class="compact-dashboard-table">
+                  <thead><tr><th>Venda</th><th>Cliente</th><th>Valor</th><th>Pagamento</th></tr></thead>
+                  <tbody id="latest-sales-table"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel dashboard-list-panel">
+              <div class="panel-header">
+                <h3>Alertas e Notificacoes</h3>
+              </div>
+              <div id="dashboard-alerts" class="alert-list"></div>
+            </div>
+
+            <div class="panel dashboard-list-panel">
+              <div class="panel-header">
+                <h3>Top Vendedores</h3>
+              </div>
+              <div class="table-wrap compact-table-wrap">
+                <table class="compact-dashboard-table">
+                  <thead><tr><th>Vendedor</th><th>Vendas</th><th>Total</th><th>Meta</th></tr></thead>
+                  <tbody id="top-sellers-table"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="advanced-metrics-grid dashboard-secondary-metrics">
+            <article><span>Giro de Estoque</span><strong id="metric-stock-turnover">0x</strong><small>Indicador operacional</small></article>
+            <article><span>Rentabilidade</span><strong id="metric-margin">0%</strong><small>Lucro sobre vendas</small></article>
+            <article><span>CAC</span><strong id="metric-cac">R$ 0,00</strong><small>Custo por cliente</small></article>
+            <article><span>LTV</span><strong id="metric-ltv">R$ 0,00</strong><small>Valor medio por cliente</small></article>
+            <article><span>Conversao</span><strong id="metric-conversion">0%</strong><small>Vendas por cliente</small></article>
+            <article><span>Licenca</span><strong id="metric-license">-</strong><small id="metric-license-note">Plano atual</small></article>
+          </div>
+
+          <div class="dashboard-hidden-metrics" aria-hidden="true">
+            <span id="dash-cash">R$ 0,00</span>
+            <span id="dash-products">0</span>
+            <span id="dash-low-stock">0</span>
+            <div id="latest-income"></div>
+            <div id="latest-expenses"></div>
+            <div id="low-stock-list"></div>
+            <table><tbody id="low-stock-table"></tbody></table>
+          </div>
+        </section>
+
+        <section id="pdv" class="screen">
+          <div class="pdv-header">
+            <div class="pdv-titlebar">
+              <div>
+                <span>Ponto de venda</span>
+                <strong>PDV</strong>
+              </div>
+              <small><b data-current-date-text></b><i></i>Online</small>
+            </div>
+            <div class="pdv-cash-bar">
+              <div class="pdv-cash-icon" aria-hidden="true">R$</div>
+              <div>
+                <span>Caixa</span>
+                <strong id="pdv-cash-status">Fechado</strong>
+              </div>
+              <strong id="pdv-cash-total">R$ 0,00</strong>
+              <button id="pdv-open-cash" class="btn small primary" type="button">Abrir caixa</button>
+              <button id="pdv-close-cash" class="btn small danger ghost" type="button">Fechar caixa</button>
+            </div>
+            <div class="pdv-header-summary">
+              <span>Vendedor</span>
+              <strong id="pdv-seller-current">Vendedor no fechamento</strong>
+            </div>
+            <div class="pdv-actions">
+              <button id="pdv-lock-mode" class="btn ghost" type="button" disabled>Desbloquear</button>
+              <button class="btn ghost pdv-sale-mode" type="button" aria-pressed="false">Modo venda</button>
+              <button id="pdv-fullscreen" class="btn ghost pdv-fullscreen-btn" type="button" aria-pressed="false">Tela cheia</button>
+              <button id="open-drawer" class="btn ghost drawer-btn" type="button">Abrir gaveta <kbd>F2</kbd></button>
+            </div>
+          </div>
+
+          <div class="pdv-workspace">
+            <div class="pdv-catalog panel">
+              <div class="pdv-search-row">
+                <div class="pdv-search-box">
+                  <span aria-hidden="true">Buscar</span>
+                  <input id="product-search" type="search" placeholder="Buscar produto por nome ou código..." autocomplete="off" />
+                </div>
+                <button id="quick-product" class="btn primary" type="button">+ Produto</button>
+              </div>
+              <div id="category-filter" class="category-filter"></div>
+              <div id="search-results" class="product-results pdv-product-grid"></div>
+            </div>
+
+            <div class="pdv-cart panel">
+              <div class="panel-header">
+                <h3>Carrinho de compras</h3>
+                <button id="clear-cart" class="btn small danger ghost" type="button">Limpar</button>
+              </div>
+              <details class="quote-box">
+                <summary>Orcamentos</summary>
+                <div class="quote-actions">
+                  <button id="save-quote" class="btn small ghost" type="button">Salvar</button>
+                  <select id="quote-select"></select>
+                  <button id="recover-quote" class="btn small ghost" type="button">Recuperar</button>
+                  <button id="convert-quote" class="btn small primary" type="button">Vender</button>
+                  <button id="cancel-quote" class="btn small danger ghost" type="button">Cancelar</button>
+                </div>
+              </details>
+              <div class="cart-head">
+                <span>Produto</span>
+                <span>Quantidade</span>
+                <span>Unitário</span>
+                <span>Valor final</span>
+                <span>Total</span>
+              </div>
+              <div id="cart-table" class="pdv-cart-list"></div>
+              <div class="checkout-summary">
+                <div>
+                  <span>Subtotal</span>
+                  <strong id="cart-subtotal">R$ 0,00</strong>
+                </div>
+                <div id="cart-item-adjustment-row" class="hidden">
+                  <span>Ajuste por itens</span>
+                  <strong id="cart-item-adjustment">R$ 0,00</strong>
+                </div>
+                <label>
+                  <span>Desconto</span>
+                  <div class="discount-control">
+                    <select id="cart-discount-type" aria-label="Tipo de desconto">
+                      <option value="value">R$</option>
+                      <option value="percent">%</option>
+                    </select>
+                    <input id="cart-discount" type="number" min="0" step="0.01" value="0" />
+                  </div>
+                </label>
+                <div class="summary-total">
+                  <span>Total</span>
+                  <strong id="cart-total">R$ 0,00</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="checkout pdv-payment-footer">
+            <div class="pdv-footer-total">
+              <span>Total da venda</span>
+              <strong id="pdv-footer-total">R$ 0,00</strong>
+              <small>Pagamento, cliente e vendedor na finalizacao</small>
+            </div>
+            <button id="finish-sale" class="btn primary full finish-sale-btn" type="button">Finalizar venda <kbd>F4</kbd></button>
+          </div>
+
+          <div id="pdv-checkout-modal" class="pdv-checkout-modal hidden" aria-hidden="true">
+            <div class="pdv-checkout-panel" role="dialog" aria-modal="true" aria-labelledby="pdv-checkout-title">
+              <div class="pdv-checkout-head">
+                <div>
+                  <span>Fechamento</span>
+                  <strong id="pdv-checkout-title">Finalizar venda</strong>
+                </div>
+                <button id="pdv-checkout-close" class="btn small ghost" type="button" aria-label="Fechar finalizacao">Fechar</button>
+              </div>
+              <div class="pdv-checkout-body">
+                <label class="pdv-seller-select">
+                  <span>Vendedor</span>
+                  <select id="pdv-seller"></select>
+                </label>
+
+                <div class="pdv-client-box pdv-checkout-client">
+                  <div class="pdv-client-header">
+                    <strong>Cliente</strong>
+                    <button id="pdv-new-client" class="btn small ghost" type="button">+ Cliente</button>
+                  </div>
+                  <div class="pdv-client-controls">
+                    <input id="pdv-client-search" type="search" placeholder="Buscar por nome, CPF/CNPJ ou telefone..." />
+                    <select id="pdv-client-select"></select>
+                    <button id="pdv-clear-client" class="btn small ghost" type="button">Limpar</button>
+                  </div>
+                  <div id="pdv-client-summary" class="pdv-client-summary muted">Consumidor final.</div>
+                </div>
+
+                <div class="pdv-checkout-section">
+                  <span>Valores por item</span>
+                  <div id="pdv-checkout-item-adjustments" class="pdv-checkout-items"></div>
+                </div>
+
+                <div class="pdv-checkout-section">
+                  <span>Forma de pagamento</span>
+            <div class="payment-options">
+              <button class="payment-option active" type="button" data-payment="Dinheiro">Dinheiro</button>
+              <button class="payment-option" type="button" data-payment="Pix">Pix</button>
+              <button class="payment-option" type="button" data-payment="Cartão">Cartao</button>
+              <button class="payment-option" type="button" data-payment="Fiado">Fiado</button>
+              <select id="payment-method" class="hidden">
+                <option>Dinheiro</option>
+                <option>Pix</option>
+                <option>Cartão</option>
+                <option>Fiado</option>
+              </select>
+            </div>
+                </div>
+                <div class="cash-row">
+                  <label>Recebido (R$) <input id="amount-received" type="number" min="0" step="0.01" placeholder="R$ 0,00" /></label>
+                  <div class="change-box">
+                    <span>Troco</span>
+                    <strong id="change-value">R$ 0,00</strong>
+                  </div>
+                </div>
+                <aside class="pdv-checkout-summary" aria-label="Resumo da venda">
+                  <span>Resumo</span>
+                  <div><small>Subtotal</small><strong id="pdv-checkout-subtotal">R$ 0,00</strong></div>
+                  <div id="pdv-checkout-item-adjustment-row" class="hidden"><small>Ajuste itens</small><strong id="pdv-checkout-item-adjustment">R$ 0,00</strong></div>
+                  <div><small>Desconto</small><strong id="pdv-checkout-discount">R$ 0,00</strong></div>
+                  <div class="checkout-summary-total"><small>Total</small><strong id="pdv-checkout-total">R$ 0,00</strong></div>
+                </aside>
+              </div>
+              <div class="pdv-checkout-actions">
+                <button id="pdv-checkout-cancel" class="btn ghost" type="button">Cancelar</button>
+                <button id="confirm-finish-sale" class="btn primary full finish-sale-btn" type="button">Confirmar venda <kbd>F4</kbd></button>
+              </div>
+            </div>
+          </div>
+
+          <div id="pdv-lock-overlay" class="pdv-lock-overlay hidden" aria-hidden="true">
+            <div class="pdv-lock-panel" role="dialog" aria-modal="true" aria-labelledby="pdv-lock-title">
+              <strong id="pdv-lock-title">PDV bloqueado</strong>
+              <p>Informe a senha do administrador para liberar a tela.</p>
+              <form id="pdv-unlock-form">
+                <label>Senha admin <input id="pdv-unlock-password" type="password" autocomplete="current-password" /></label>
+                <button id="pdv-unlock-submit" class="btn primary full" type="submit">Liberar PDV</button>
+              </form>
+            </div>
+          </div>
+          <div id="print-area" class="receipt hidden"></div>
+        </section>
+
+        <section id="products" class="screen">
+          <div class="inventory-stats stats-grid">
+            <article class="stat-card dashboard-stat">
+              <span class="stat-icon">▣</span>
+              <div>
+                <span>Total de Produtos</span>
+                <strong id="inventory-total-products">0</strong>
+                <small>Produtos cadastrados</small>
+              </div>
+            </article>
+            <article class="stat-card dashboard-stat green">
+              <span class="stat-icon">▤</span>
+              <div>
+                <span>Estoque Total</span>
+                <strong id="inventory-total-stock">0</strong>
+                <small>Itens em estoque</small>
+              </div>
+            </article>
+            <article class="stat-card dashboard-stat orange">
+              <span class="stat-icon">!</span>
+              <div>
+                <span>Estoque Baixo</span>
+                <strong id="inventory-low-stock">0</strong>
+                <small>Produtos em alerta</small>
+              </div>
+            </article>
+            <article class="stat-card dashboard-stat blue">
+              <span class="stat-icon">↗</span>
+              <div>
+                <span>Valor Total do Estoque</span>
+                <strong id="inventory-stock-value">R$ 0,00</strong>
+                <small>Custo total dos produtos</small>
+              </div>
+            </article>
+          </div>
+
+          <div class="panel inventory-panel">
+            <div class="inventory-panel-header">
+              <h3>Lista de Produtos</h3>
+              <span id="stock-alert" class="badge">Estoque em dia</span>
+            </div>
+            <div class="inventory-toolbar">
+              <div class="pdv-search-box inventory-search">
+                <span>⌕</span>
+                <input id="inventory-search" type="search" placeholder="Buscar produto por nome, código ou categoria..." />
+              </div>
+              <select id="inventory-category-filter">
+                <option value="Todas">Todas as Categorias</option>
+              </select>
+              <select id="inventory-status-filter">
+                <option value="Todos">Todos os Status</option>
+                <option value="Normal">Normal</option>
+                <option value="Baixo">Baixo</option>
+                <option value="Critico">Crítico</option>
+              </select>
+              <button id="import-products" class="btn ghost" type="button">Importar planilha</button>
+              <button id="products-template" class="btn ghost" type="button">Modelo CSV</button>
+              <button id="new-product-btn" class="btn primary" type="button">+ Novo Produto</button>
+            </div>
+            <div class="table-wrap">
+              <table class="inventory-table">
+                <thead>
+                  <tr>
+                    <th>Código</th>
+                    <th>Produto</th>
+                    <th>Categoria</th>
+                    <th>Varejo (R$)</th>
+                    <th>Atacado (R$)</th>
+                    <th>Preço de Custo (R$)</th>
+                    <th>Margens</th>
+                    <th>Estoque</th>
+                    <th>Est. Mínimo</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="products-table"></tbody>
+              </table>
+            </div>
+            <div class="inventory-footer">
+              <span id="inventory-count-label">Mostrando 0 produtos</span>
+              <span>Itens por página: <strong>10</strong></span>
+            </div>
+          </div>
+
+          <div id="product-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="product-form-title">
+            <div class="modal-backdrop" data-close-product-modal="true"></div>
+            <div class="modal-card">
+              <div class="panel-header">
+                <h3 id="product-form-title">Cadastrar produto</h3>
+                <button id="cancel-product-edit" class="btn small ghost" type="button">Fechar</button>
+              </div>
+              <form id="product-form" class="product-form">
+                <input type="hidden" id="product-id" />
+                <label>Código automático <input id="product-code" placeholder="Gerado automaticamente" readonly /></label>
+                <label>Nome <input id="product-name" required /></label>
+                <label>Categoria <input id="product-category" list="product-category-list" required /><datalist id="product-category-list"></datalist></label>
+                <label>Código de barras <input id="product-barcode" /></label>
+                <label>Fornecedor <input id="product-supplier" /></label>
+                <label>Preço varejo (R$) <input id="product-retail-price" type="number" min="0" step="0.01" placeholder="R$ 0,00" required /></label>
+                <label>Preço atacado (R$) <input id="product-wholesale-price" type="number" min="0" step="0.01" placeholder="R$ 0,00" /></label>
+                <label>Qtd. minima atacado <input id="product-wholesale-min-qty" type="number" min="1" step="1" value="1" /></label>
+                <input id="product-price" type="hidden" />
+                <label>Preço custo (R$) <input id="product-cost" type="number" min="0" step="0.01" placeholder="R$ 0,00" required /></label>
+                <label>Estoque <input id="product-stock" type="number" min="0" step="1" required /></label>
+                <label>Estoque mínimo <input id="product-min-stock" type="number" min="0" step="1" required /></label>
+                <div class="modal-actions">
+                  <button class="btn ghost" type="button" data-close-product-modal="true">Cancelar</button>
+                  <button class="btn primary" type="submit">Salvar produto</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <section id="finance" class="screen">
+          <div class="stats-grid">
+            <article class="stat-card dashboard-stat">
+              <span class="stat-icon">+</span>
+              <div>
+                <span>Entradas</span>
+                <strong id="finance-overview-income">R$ 0,00</strong>
+                <small>Vendas no período</small>
+              </div>
+            </article>
+            <article class="stat-card dashboard-stat orange">
+              <span class="stat-icon">-</span>
+              <div>
+                <span>Saídas</span>
+                <strong id="finance-overview-expenses">R$ 0,00</strong>
+                <small>Despesas no período</small>
+              </div>
+            </article>
+            <article class="stat-card dashboard-stat green">
+              <span class="stat-icon">=</span>
+              <div>
+                <span>Saldo</span>
+                <strong id="finance-overview-balance">R$ 0,00</strong>
+                <small>Resultado final</small>
+              </div>
+            </article>
+            <article class="stat-card dashboard-stat blue">
+              <span class="stat-icon">#</span>
+              <div>
+                <span>Vendas</span>
+                <strong id="finance-overview-sales-count">0</strong>
+                <small>Quantidade</small>
+              </div>
+            </article>
+          </div>
+          <div class="panel cash-panel">
+            <div class="panel-header">
+              <h3>Caixa do dia</h3>
+              <span id="cash-status" class="badge">Fechado</span>
+            </div>
+            <div class="cash-actions">
+              <button id="open-cash" class="btn primary" type="button">Abrir caixa</button>
+              <button id="cash-in" class="btn ghost" type="button">Reforço</button>
+              <button id="cash-out" class="btn ghost" type="button">Sangria</button>
+              <button id="close-cash" class="btn danger" type="button">Fechar caixa</button>
+              <strong id="cash-session-total">R$ 0,00</strong>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Historico de caixa</h3>
+            </div>
+            <div class="table-wrap compact-table-wrap">
+              <table class="compact-dashboard-table">
+                <thead><tr><th>Abertura</th><th>Fechamento</th><th>Inicial</th><th>Vendido</th><th>Esperado</th><th>Informado</th><th>Diferenca</th></tr></thead>
+                <tbody id="cash-history-table"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="finance-grid">
+            <div class="panel">
+              <div class="panel-header">
+                <h3>Registrar despesa</h3>
+              </div>
+              <form id="expense-form" class="expense-form">
+                <label>Descrição <input id="expense-description" required /></label>
+                <label>Categoria <input id="expense-category" value="Geral" required /></label>
+                <label>Valor (R$) <input id="expense-value" type="number" min="0.01" step="0.01" placeholder="R$ 0,00" required /></label>
+                <label>Data <input id="expense-date" type="date" required /></label>
+                <button class="btn primary">Registrar saída</button>
+              </form>
+            </div>
+            <div class="panel">
+              <div class="panel-header">
+                <h3>Filtro e totais</h3>
+              </div>
+              <div class="date-filter">
+                <label>De <input id="filter-start" type="date" /></label>
+                <label>Até <input id="filter-end" type="date" /></label>
+                <button id="clear-filter" class="btn ghost">Limpar</button>
+              </div>
+              <div class="finance-totals">
+                <span>Vendas: <strong id="finance-sales-total">R$ 0,00</strong></span>
+                <span>Despesas: <strong id="finance-expense-total">R$ 0,00</strong></span>
+                <span>Saldo final: <strong id="finance-balance">R$ 0,00</strong></span>
+                <span>Comissoes: <strong id="finance-commission-total">R$ 0,00</strong></span>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Comissoes por vendedor</h3>
+            </div>
+            <div id="finance-commission-summary" class="commission-summary"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Entradas e saídas</h3>
+              <button id="print-report" class="btn small ghost">Relatório simples</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Tipo</th>
+                    <th>Descrição</th>
+                    <th>Forma</th>
+                    <th>Valor (R$)</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="finance-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section id="finance-income" class="screen">
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Entradas</h3>
+              <strong id="income-total" class="panel-total">R$ 0,00</strong>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Origem</th>
+                    <th>Forma</th>
+                    <th>Itens</th>
+                    <th>Valor (R$)</th>
+                    <th>Acoes</th>
+                  </tr>
+                </thead>
+                <tbody id="income-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section id="finance-expenses" class="screen">
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Saídas</h3>
+              <strong id="expenses-total" class="panel-total danger-text">R$ 0,00</strong>
+            </div>
+            <form id="expense-form-secondary" class="expense-form compact-expense-form">
+              <label>Descrição <input id="expense-description-secondary" required /></label>
+              <label>Categoria <input id="expense-category-secondary" value="Geral" required /></label>
+              <label>Valor (R$) <input id="expense-value-secondary" type="number" min="0.01" step="0.01" placeholder="R$ 0,00" required /></label>
+              <label>Data <input id="expense-date-secondary" type="date" required /></label>
+              <button class="btn primary">Registrar saída</button>
+            </form>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Descrição</th>
+                    <th>Tipo</th>
+                    <th>Valor (R$)</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="expenses-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section id="accounts-payable" class="screen">
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Contas a Pagar</h3>
+              <button id="new-payable" class="btn primary" type="button">+ Conta</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Vencimento</th>
+                    <th>Descrição</th>
+                    <th>Categoria</th>
+                    <th>Status</th>
+                    <th>Valor (R$)</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="payable-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section id="accounts-receivable" class="screen">
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Contas a Receber</h3>
+              <button id="new-receivable" class="btn primary" type="button">+ Conta</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Vencimento</th>
+                    <th>Cliente</th>
+                    <th>Descrição</th>
+                    <th>Status</th>
+                    <th>Valor (R$)</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="receivable-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section id="sales" class="screen">
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Vendas</h3>
+              <div class="panel-header-actions">
+                <button id="reprint-selected-sale" class="btn ghost" type="button" data-reprint-selected-sale="true" disabled>Reimprimir cupom</button>
+                <button class="btn primary" type="button" data-screen-jump="pdv">Nova venda</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Selecionar</th>
+                    <th>Data e hora</th>
+                    <th>Produtos vendidos</th>
+                    <th>Pagamento</th>
+                    <th>Desconto (R$)</th>
+                    <th>Total (R$)</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="sales-full-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section id="reports" class="screen">
+          <div class="stats-grid">
+            <article class="stat-card dashboard-stat">
+              <span class="stat-icon">R$</span>
+              <div>
+                <span>Receita total</span>
+                <strong id="report-income">R$ 0,00</strong>
+                <small>Vendas registradas</small>
+              </div>
+            </article>
+            <article class="stat-card dashboard-stat orange">
+              <span class="stat-icon">-</span>
+              <div>
+                <span>Despesas totais</span>
+                <strong id="report-expenses">R$ 0,00</strong>
+                <small>Saídas registradas</small>
+              </div>
+            </article>
+            <article class="stat-card dashboard-stat green">
+              <span class="stat-icon">=</span>
+              <div>
+                <span>Saldo</span>
+                <strong id="report-balance">R$ 0,00</strong>
+                <small>Resultado atual</small>
+              </div>
+            </article>
+            <article class="stat-card dashboard-stat blue">
+              <span class="stat-icon">#</span>
+              <div>
+                <span>Vendas</span>
+                <strong id="report-sales-count">0</strong>
+                <small>Quantidade total</small>
+              </div>
+            </article>
+          </div>
+          <div class="panel report-panel">
+            <div class="panel-header">
+              <h3>Relatório simples</h3>
+              <button id="export-data" class="btn primary" type="button">Exportar backup JSON</button>
+              <button id="export-csv" class="btn ghost" type="button">Exportar CSV</button>
+              <button id="export-pdf" class="btn ghost" type="button">Exportar PDF</button>
+            </div>
+            <div class="report-filter-head">
+              <small id="report-active-filter" class="muted">Todos os dados do sistema</small>
+            </div>
+            <div class="report-filter-bar">
+              <label>Relatório
+                <select id="report-kind">
+                  <option value="general">Geral</option>
+                  <option value="financial">Financeiro</option>
+                  <option value="sales">Vendas</option>
+                  <option value="products">Produtos vendidos</option>
+                  <option value="clients">Clientes</option>
+                  <option value="payments">Formas de pagamento</option>
+                  <option value="commissions">Comissões</option>
+                </select>
+              </label>
+              <label>Período
+                <select id="report-period">
+                  <option value="all">Todo o período</option>
+                  <option value="today">Hoje</option>
+                  <option value="7days">Últimos 7 dias</option>
+                  <option value="month">Mês atual</option>
+                  <option value="custom">Personalizado</option>
+                </select>
+              </label>
+              <label>De <input id="report-start" type="date" /></label>
+              <label>Até <input id="report-end" type="date" /></label>
+              <label>Formato
+                <select id="report-format">
+                  <option value="screen">Ver na tela</option>
+                  <option value="csv">CSV</option>
+                  <option value="txt">TXT</option>
+                  <option value="pdf">PDF</option>
+                  <option value="json">Backup JSON</option>
+                </select>
+              </label>
+              <button id="generate-report" class="btn primary" type="button">Gerar relatório</button>
+            </div>
+            <div id="report-summary" class="report-summary"></div>
+            <div id="report-export-preview" class="table-wrap compact-table-wrap report-export-preview"></div>
+          </div>
+          <div class="report-detail-grid">
+            <div class="panel report-chart-panel">
+              <div class="panel-header"><h3>Evolucao financeira</h3><span class="status-pill normal">Ultimos 7 dias</span></div>
+              <div id="report-evolution-chart" class="finance-chart"></div>
+            </div>
+            <div class="panel">
+              <div class="panel-header"><h3>Resumo financeiro</h3></div>
+              <div id="report-financial-detail" class="report-financial-detail"></div>
+            </div>
+            <div class="panel dashboard-list-panel">
+              <div class="panel-header"><h3>Produtos mais vendidos</h3></div>
+              <div class="table-wrap compact-table-wrap"><table class="compact-dashboard-table"><thead><tr><th>Produto</th><th>Qtd.</th><th>Faturamento (R$)</th></tr></thead><tbody id="report-top-products"></tbody></table></div>
+            </div>
+            <div class="panel dashboard-list-panel">
+              <div class="panel-header"><h3>Produtos por periodo</h3></div>
+              <div class="date-filter commission-report-filter">
+                <label>De <input id="product-report-start" type="date" /></label>
+                <label>Ate <input id="product-report-end" type="date" /></label>
+                <label>Vendedor <select id="product-report-seller"></select></label>
+                <label>Categoria <select id="product-report-category"></select></label>
+              </div>
+              <div class="table-wrap compact-table-wrap">
+                <table class="compact-dashboard-table">
+                  <thead><tr><th>Produto</th><th>Qtd.</th><th>Faturamento</th><th>Lucro</th></tr></thead>
+                  <tbody id="product-report-table"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="panel dashboard-list-panel">
+              <div class="panel-header"><h3>Clientes que mais compraram</h3></div>
+              <div class="table-wrap compact-table-wrap"><table class="compact-dashboard-table"><thead><tr><th>Cliente</th><th>Compras</th><th>Total (R$)</th></tr></thead><tbody id="report-top-clients"></tbody></table></div>
+            </div>
+            <div class="panel dashboard-list-panel">
+              <div class="panel-header"><h3>Formas de pagamento</h3></div>
+              <div class="table-wrap compact-table-wrap"><table class="compact-dashboard-table"><thead><tr><th>Forma</th><th>Qtd.</th><th>Total (R$)</th></tr></thead><tbody id="report-payments"></tbody></table></div>
+            </div>
+            <div class="panel">
+              <div class="panel-header"><h3>Indicadores principais</h3></div>
+              <div id="report-indicators" class="report-indicators"></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Relatorio de comissoes</h3>
+              <button id="export-commission-csv" class="btn ghost" type="button">Exportar comissoes CSV</button>
+            </div>
+            <div class="date-filter commission-report-filter">
+              <label>De <input id="commission-start" type="date" /></label>
+              <label>Ate <input id="commission-end" type="date" /></label>
+              <label>Vendedor <select id="commission-seller"></select></label>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Vendedor</th>
+                    <th>Vendas</th>
+                    <th>Total vendido</th>
+                    <th>Comissao %</th>
+                    <th>Comissao a pagar</th>
+                  </tr>
+                </thead>
+                <tbody id="commission-report-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section id="clients" class="screen clients-screen">
+          <div class="clients-kpi-grid">
+            <article class="client-kpi-card">
+              <span class="client-kpi-icon client-kpi-green">CL</span>
+              <div>
+                <span>Total de Clientes</span>
+                <strong id="clients-total">0</strong>
+                <small>clientes cadastrados</small>
+              </div>
+            </article>
+            <article class="client-kpi-card">
+              <span class="client-kpi-icon client-kpi-blue">+</span>
+              <div>
+                <span>Último Cadastro</span>
+                <strong id="clients-new-month">0</strong>
+                <small>data mais recente</small>
+              </div>
+            </article>
+            <article class="client-kpi-card">
+              <span class="client-kpi-icon client-kpi-green">OK</span>
+              <div>
+                <span>Clientes Ativos</span>
+                <strong id="clients-active">0</strong>
+                <small>clientes ativos</small>
+              </div>
+            </article>
+            <article class="client-kpi-card">
+              <span class="client-kpi-icon client-kpi-purple">R$</span>
+              <div>
+                <span>Clientes com Compras</span>
+                <strong id="clients-ticket">R$ 0,00</strong>
+                <small>vendas vinculadas</small>
+              </div>
+            </article>
+            <article class="client-kpi-card">
+              <span class="client-kpi-icon client-kpi-red">!</span>
+              <div>
+                <span>Clientes com Debito</span>
+                <strong id="clients-debt">0</strong>
+                <small>clientes</small>
+              </div>
+            </article>
+          </div>
+
+          <div class="clients-layout">
+            <div class="panel clients-table-panel">
+              <div class="client-panel-title">
+                <h3>Clientes Recentes</h3>
+              </div>
+              <div class="clients-toolbar">
+                <label class="client-search">
+                  <span>⌕</span>
+                  <input id="client-search" type="search" placeholder="Buscar cliente..." />
+                </label>
+                <select id="client-status-filter" class="compact-select">
+                  <option value="Todos">Todos os status</option>
+                  <option value="Ativo">Ativos</option>
+                  <option value="Inativo">Inativos</option>
+                  <option value="Debito">Com debito</option>
+                  <option value="Compras">Com compras</option>
+                </select>
+                <button id="new-client" class="btn primary" type="button">+ Novo Cliente</button>
+                <button id="import-clients" class="btn ghost" type="button">Importar arquivo</button>
+                <button id="clients-template" class="btn ghost" type="button">Modelo CSV</button>
+                <button id="client-filter-btn" class="btn ghost" type="button">Filtrar</button>
+                <button id="export-clients" class="btn ghost" type="button">Exportar</button>
+              </div>
+              <div class="table-wrap clients-table-wrap">
+                <table class="clients-table">
+                  <thead>
+                    <tr>
+                      <th>Cliente</th>
+                      <th>Telefone</th>
+                      <th>CPF/CNPJ</th>
+                      <th>Ultima Compra</th>
+                      <th>Total Comprado</th>
+                      <th>Status</th>
+                      <th>Acoes</th>
+                    </tr>
+                  </thead>
+                  <tbody id="clients-table"></tbody>
+                </table>
+              </div>
+              <div class="clients-footer">
+                <span id="clients-showing">Mostrando 0 clientes</span>
+                <div class="client-pagination" aria-hidden="true">
+                  <button type="button">&lt;</button>
+                  <button class="active" type="button">1</button>
+                  <button type="button">2</button>
+                  <button type="button">3</button>
+                  <span>...</span>
+                  <button type="button">31</button>
+                  <button type="button">&gt;</button>
+                </div>
+              </div>
+            </div>
+
+            <aside class="clients-side">
+              <div class="panel clients-summary-panel">
+                <h3>Resumo de Clientes</h3>
+                <div class="clients-donut-row">
+                  <div class="clients-donut" id="clients-donut">
+                    <div>
+                      <strong id="clients-donut-total">0</strong>
+                      <span>Total de Clientes</span>
+                    </div>
+                  </div>
+                  <div class="clients-legend">
+                    <span><i class="legend-green"></i>Ativos <strong id="clients-active-legend">0 (0%)</strong></span>
+                    <span><i class="legend-amber"></i>Inativos <strong id="clients-inactive-legend">0 (0%)</strong></span>
+                    <span><i class="legend-red"></i>Com Debito <strong id="clients-debt-legend">0 (0%)</strong></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel clients-breakdown" id="clients-breakdown"></div>
+
+              <div class="panel client-quick-actions">
+                <h3>Acoes rapidas</h3>
+                <button class="btn ghost" type="button" id="client-quick-new">Novo cliente</button>
+                <button class="btn ghost" type="button" id="client-quick-import">Importar clientes</button>
+                <button class="btn ghost" type="button" id="client-quick-export">Exportar base</button>
+              </div>
+
+              <div class="panel clients-tip">
+                <span>i</span>
+                <p><strong>Dica:</strong> Mantenha seus dados de clientes sempre atualizados para melhorar suas vendas e relacionamento.</p>
+              </div>
+            </aside>
+          </div>
+          <div class="panel service-panel">
+            <div class="panel-header">
+              <h3>Trocas, garantias e assistencia</h3>
+              <div class="settings-inline-actions">
+                <button id="new-exchange" class="btn small ghost" type="button">Troca</button>
+                <button id="new-warranty" class="btn small ghost" type="button">Garantia</button>
+                <button id="new-service-order" class="btn small primary" type="button">Ordem de servico</button>
+              </div>
+            </div>
+            <div class="table-wrap compact-table-wrap">
+              <table class="compact-dashboard-table">
+                <thead><tr><th>Tipo</th><th>Cliente</th><th>Produto</th><th>Status</th><th>Entrada</th><th>Previsao</th><th>Valor</th></tr></thead>
+                <tbody id="service-records-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section id="settings" class="screen settings-screen">
+          <div class="settings-layout">
+            <aside class="panel settings-tabs-card">
+              <button class="settings-tab active" type="button" data-settings-tab="store"><span>LJ</span>Loja</button>
+              <button class="settings-tab" type="button" data-settings-tab="users"><span>US</span>Usuários</button>
+              <button class="settings-tab" type="button" data-settings-tab="permissions"><span>PE</span>Permissões</button>
+              <button class="settings-tab" type="button" data-settings-tab="finance"><span>FI</span>Financeiro</button>
+              <button class="settings-tab" type="button" data-settings-tab="pdv-settings"><span>PD</span>PDV</button>
+              <button class="settings-tab" type="button" data-settings-tab="notifications"><span>NO</span>Notificações</button>
+              <button class="settings-tab" type="button" data-settings-tab="integrations"><span>IN</span>Integrações</button>
+              <button class="settings-tab" type="button" data-settings-tab="security"><span>SE</span>Segurança</button>
+              <button class="settings-tab" type="button" data-settings-tab="backup"><span>BK</span>Backup</button>
+              <button class="settings-tab" type="button" data-settings-tab="license"><span>LC</span>Licença</button>
+              <button class="settings-tab" type="button" data-settings-tab="appearance"><span>AP</span>Aparência</button>
+            </aside>
+
+            <div id="settings-tab-content" class="panel settings-content-panel"></div>
+          </div>
+        </section>
+      </section>
+    </div>
+
+    <script src="/config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="src/vendor/xlsx.full.min.js?v=1.1.34"></script>
+    <script src="src/services/licenseCacheService.js"></script>
+    <script src="src/services/saasLicenseService.js"></script>
+    <script src="src/services/systemAccessService.js"></script>
+    <script src="src/services/localDatabaseService.js"></script>
+    <script src="src/components/LicenseBlockedScreen.js"></script>
+    <script src="app.js?v=1.1.34"></script>
+  </body>
+</html>

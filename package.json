@@ -1,0 +1,30 @@
+{
+  "name": "mptech-saas-panel",
+  "version": "2.0.0",
+  "private": true,
+  "description": "MPTech SaaS Panel - painel multi-tenant para licencas, clientes, planos e integracao com Gestor/PDV.",
+  "main": "local-server/server.js",
+  "scripts": {
+    "start": "node local-server/server.js",
+    "dev": "node --watch local-server/server.js",
+    "check": "node --check app.js && npm --prefix local-server run check",
+    "test": "node --test local-server/tests/smoke.test.js",
+    "test:full": "node scripts/test-pdv-flow.js && node scripts/test-pdv-evolution.js && node scripts/test-business-features.js && node scripts/test-operational-integrity.js && node scripts/test-backup-restore.js && node scripts/test-client-import.js",
+    "release:check": "node scripts/release-check.js",
+    "diagnostics:production": "node scripts/production-diagnostics.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "pg": "^8.13.1"
+  }
+}
